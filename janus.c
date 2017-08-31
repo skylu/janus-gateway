@@ -431,6 +431,7 @@ static gboolean janus_check_sessions(gpointer user_data) {
 				janus_mutex_lock(&session->mutex);
 				session->timeout = 1;
 				/* Remove all handles */
+				/* 
 				if(session->ice_handles != NULL && g_hash_table_size(session->ice_handles) > 0) {
 					GHashTableIter iter;
 					gpointer value;
@@ -444,6 +445,7 @@ static gboolean janus_check_sessions(gpointer user_data) {
 						g_hash_table_iter_remove(&iter);
 					}
 				}
+				*／
 				janus_mutex_unlock(&session->mutex);
 				/* Notify the transport */
 				if(session->source) {
@@ -873,6 +875,7 @@ int janus_process_incoming_request(janus_request *request) {
 		janus_mutex_lock(&session->mutex);
 		session->destroy = 1;
 		/* Remove all handles */
+		/* 
 		if(session->ice_handles != NULL && g_hash_table_size(session->ice_handles) > 0) {
 			GHashTableIter iter;
 			gpointer value;
@@ -886,6 +889,7 @@ int janus_process_incoming_request(janus_request *request) {
 				g_hash_table_iter_remove(&iter);
 			}
 		}
+		*／
 		janus_mutex_unlock(&session->mutex);
 		g_hash_table_remove(sessions, &session->session_id);
 		g_hash_table_insert(old_sessions, janus_uint64_dup(session->session_id), session);
