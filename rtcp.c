@@ -873,15 +873,7 @@ int janus_rtcp_sdes(char *packet, int len, const char *cname, int cnamelen) {
 
 /* Generate a new REMB message */
 int janus_rtcp_remb(char *packet, int len, uint32_t bitrate) {
-	/* By default we assume a single SSRC will be set */
-	return janus_rtcp_remb_ssrcs(packet, len, bitrate, 1);
-}
-
-int janus_rtcp_remb_ssrcs(char *packet, int len, uint32_t bitrate, uint8_t numssrc) {
-	if(packet == NULL || numssrc == 0)
-		return -1;
-	int min_len = 20 + numssrc*4;
-	if(len < min_len)
+	if(packet == NULL || len != 24)
 		return -1;
 	memset(packet, 0, len);
 	rtcp_header *rtcp = (rtcp_header *)packet;
@@ -889,7 +881,7 @@ int janus_rtcp_remb_ssrcs(char *packet, int len, uint32_t bitrate, uint8_t numss
 	rtcp->version = 2;
 	rtcp->type = RTCP_PSFB;
 	rtcp->rc = 15;
-	rtcp->length = htons((min_len/4)-1);
+	rtcp->length = htons((len/4)-1);
 	/* Now set REMB stuff */
 	rtcp_fb *rtcpfb = (rtcp_fb *)rtcp;
 	rtcp_remb *remb = (rtcp_remb *)rtcpfb->fci;
@@ -913,12 +905,12 @@ int janus_rtcp_remb_ssrcs(char *packet, int len, uint32_t bitrate, uint8_t numss
 	/* FIXME From rtcp_sender.cc */
 	unsigned char *_ptrRTCPData = (unsigned char *)remb;
 	_ptrRTCPData += 4;	/* Skip unique identifier */
-	_ptrRTCPData[0] = numssrc;
+	_ptrRTCPData[0] = (uint8_t)(1);	/* Just one SSRC */
 	_ptrRTCPData[1] = (uint8_t)((newbrexp << 2) + ((newbrmantissa >> 16) & 0x03));
 	_ptrRTCPData[2] = (uint8_t)(newbrmantissa >> 8);
 	_ptrRTCPData[3] = (uint8_t)(newbrmantissa);
 	JANUS_LOG(LOG_HUGE, "[REMB] bitrate=%"SCNu32" (%d bytes)\n", bitrate, 4*(ntohs(rtcp->length)+1));
-	return min_len;
+	return 24;
 }
 
 /* Generate a new FIR message */
