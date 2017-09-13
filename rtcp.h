@@ -154,8 +154,8 @@ typedef struct rtcp_remb
 	char id[4];
 	/*! \brief Num SSRC, Br Exp, Br Mantissa (bit mask) */
 	uint32_t bitrate;
-	/*! \brief SSRC feedback */
-	uint32_t ssrc[1];
+	/*! \brief SSRC feedback (we expect at max three SSRCs in there) */
+	uint32_t ssrc[3];
 } rtcp_remb;
 
 
