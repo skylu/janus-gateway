@@ -456,6 +456,10 @@ struct janus_ice_component {
 	gboolean noerrorlog;
 	/*! \brief Mutex to lock/unlock this component */
 	janus_mutex mutex;
+	/*! \brief Whether we should do NACKs (in or out) for audio */
+	gboolean do_audio_nacks;
+	/*! \brief Whether we should do NACKs (in or out) for video */
+	gboolean do_video_nacks;
 };
 
 /*! \brief Helper to handle pending trickle candidates (e.g., when we're still waiting for an offer) */
