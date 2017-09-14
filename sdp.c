@@ -315,7 +315,7 @@ int janus_sdp_process(void *ice_handle, janus_sdp *remote_sdp) {
 					}
 				} else if(!strcasecmp(a->name, "ssrc-group")) {
 					/* FIXME This can be either FID or SIM */
-					int res = janus_sdp_parse_ssrc_group(stream, (const char *)a->value, m->type == JANUS_SDP_VIDEO);
+					int res = 0;
 					if(res != 0) {
 						JANUS_LOG(LOG_ERR, "[%"SCNu64"] Failed to parse SSRC group attribute... (%d)\n", handle->handle_id, res);
 				}
@@ -574,64 +574,6 @@ int janus_sdp_parse_candidate(void *ice_stream, const char *candidate, int trick
 		JANUS_LOG(LOG_ERR, "[%"SCNu64"] Failed to parse candidate (res=%d)...\n", handle->handle_id, res);
 		return res;
 	}
-	return 0;
-}
-
-int janus_sdp_parse_ssrc_group(void *ice_stream, const char *group_attr, int video) {
-	if(ice_stream == NULL || group_attr == NULL)
-		return -1;
-	janus_ice_stream *stream = (janus_ice_stream *)ice_stream;
-	janus_ice_handle *handle = stream->handle;
-	if(handle == NULL)
-		return -2;
-	if(!video)
-		return -3;
-	gboolean fid = strstr(group_attr, "FID") != NULL;
-	gboolean sim = strstr(group_attr, "SIM") != NULL;
-	guint64 ssrc = 0;
-	gchar **list = g_strsplit(group_attr, " ", -1);
-	gchar *index = list[0];
-	if(index != NULL) {
-		int i=0;
-		while(index != NULL) {
-			if(i > 0 && strlen(index) > 0) {
-				ssrc = g_ascii_strtoull(index, NULL, 0);
-				switch(i) {
-					case 1:
-						stream->video_ssrc_peer = ssrc;
-						JANUS_LOG(LOG_VERB, "[%"SCNu64"] Peer video SSRC: %"SCNu32"\n", handle->handle_id, stream->video_ssrc_peer);
-						break;
-					case 2:
-						if(fid) {
-							stream->video_ssrc_peer_rtx = ssrc;
-							JANUS_LOG(LOG_VERB, "[%"SCNu64"] Peer video SSRC (rtx): %"SCNu32"\n", handle->handle_id, stream->video_ssrc_peer_rtx);
-						} else if(sim) {
-							stream->video_ssrc_peer_sim_1 = ssrc;
-							JANUS_LOG(LOG_VERB, "[%"SCNu64"] Peer video SSRC (sim-1): %"SCNu32"\n", handle->handle_id, stream->video_ssrc_peer_sim_1);
-						} else {
-							JANUS_LOG(LOG_WARN, "[%"SCNu64"] Don't know what to do with SSRC: %"SCNu64"\n", handle->handle_id, ssrc);
-						}
-						break;
-					case 3:
-						if(fid) {
-							JANUS_LOG(LOG_WARN, "[%"SCNu64"] Found one too many retransmission SSRC (rtx): %"SCNu64"\n", handle->handle_id, ssrc);
-						} else if(sim) {
-							stream->video_ssrc_peer_sim_2 = ssrc;
-							JANUS_LOG(LOG_VERB, "[%"SCNu64"] Peer video SSRC (sim-2): %"SCNu32"\n", handle->handle_id, stream->video_ssrc_peer_sim_2);
-						} else {
-							JANUS_LOG(LOG_WARN, "[%"SCNu64"] Don't know what to do with SSRC: %"SCNu64"\n", handle->handle_id, ssrc);
-						}
-						break;
-					default:
-						JANUS_LOG(LOG_WARN, "[%"SCNu64"] Don't know what to do with video SSRC: %"SCNu64"\n", handle->handle_id, ssrc);
-						break;
-				}
-			}
-			i++;
-			index = list[i];
-		}
-	}
-	g_clear_pointer(&list, g_strfreev);
 	return 0;
 }
 
