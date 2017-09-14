@@ -3848,6 +3848,15 @@ void *janus_ice_send_thread(void *data) {
 						}
 						if(max_nack_queue > 0) {
 							/* Save the packet for retransmissions that may be needed later */
+							if((pkt->type == JANUS_ICE_PACKET_AUDIO && !component->do_audio_nacks) ||
+									(pkt->type == JANUS_ICE_PACKET_VIDEO && !component->do_video_nacks)) {
+								/* ... unless NACKs are disabled for this medium */
+								g_free(pkt->data);
+								pkt->data = NULL;
+								g_free(pkt);
+								pkt = NULL;
+								continue;
+							}
 							janus_rtp_packet *p = (janus_rtp_packet *)g_malloc0(sizeof(janus_rtp_packet));
 							p->data = (char *)g_malloc0(protected);
 							memcpy(p->data, sbuf, protected);
