@@ -506,7 +506,7 @@ static void janus_ice_notify_media(janus_ice_handle *handle, gboolean video, gbo
 		json_object_set_new(event, "seconds", json_integer(no_media_timer));
 	/* Send the event */
 	JANUS_LOG(LOG_VERB, "[%"SCNu64"] Sending event to transport...\n", handle->handle_id);
-	janus_session_notify_event(session, event);
+	janus_session_notify_event(session->session_id, event);
 	/* Notify event handlers as well */
 	if(janus_events_is_enabled()) {
 		json_t *info = json_object();
@@ -534,7 +534,7 @@ void janus_ice_notify_hangup(janus_ice_handle *handle, const char *reason) {
 		json_object_set_new(event, "reason", json_string(reason));
 	/* Send the event */
 	JANUS_LOG(LOG_VERB, "[%"SCNu64"] Sending event to transport...\n", handle->handle_id);
-	janus_session_notify_event(session, event);
+	janus_session_notify_event(session->session_id, event);
 	/* Notify event handlers as well */
 	if(janus_events_is_enabled()) {
 		json_t *info = json_object();
@@ -1130,7 +1130,7 @@ gint janus_ice_handle_destroy(void *gateway_session, guint64 handle_id) {
 	json_object_set_new(event, "sender", json_integer(handle_id));
 	/* Send the event */
 	JANUS_LOG(LOG_VERB, "[%"SCNu64"] Sending event to transport...\n", handle->handle_id);
-	janus_session_notify_event(session, event);
+	janus_session_notify_event(session->session_id, event);
 	/* We only actually destroy the handle later */
 	JANUS_LOG(LOG_VERB, "[%"SCNu64"] Handle detached (error=%d), scheduling destruction\n", handle_id, error);
 	janus_mutex_lock(&old_handles_mutex);
@@ -1480,7 +1480,7 @@ janus_slow_link_update(janus_ice_component *component, janus_ice_handle *handle,
 			json_object_set_new(event, "nacks", json_integer(sl_nack_recent_cnt));
 			/* Send the event */
 			JANUS_LOG(LOG_VERB, "[%"SCNu64"] Sending event to transport...\n", handle->handle_id);
-			janus_session_notify_event(session, event);
+			janus_session_notify_event(session->session_id, event);
 			/* Finally, notify event handlers */
 			if(janus_events_is_enabled()) {
 				json_t *info = json_object();
